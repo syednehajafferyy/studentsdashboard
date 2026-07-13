@@ -1,18 +1,37 @@
 import tkinter as tk
 from tkinter import messagebox
 
+# ---------------- MAIN WINDOW ----------------
 root = tk.Tk()
 root.title("Student Dashboard")
-root.geometry("500x700")
-root.configure(bg="#FFDDEE")  # Light Pink
+root.geometry("550x700")
+root.configure(bg="#FFDDEE")
 
 subject_entries = []
 
+# ---------------- SCROLLABLE AREA ----------------
+canvas = tk.Canvas(root, bg="#FFDDEE", highlightthickness=0)
+scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
 
+main_frame = tk.Frame(canvas, bg="#FFDDEE")
+
+main_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+)
+
+canvas.create_window((0, 0), window=main_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+
+# ---------------- FUNCTIONS ----------------
 def create_subjects():
     global subject_entries
 
-    # Clear old subject boxes
+    # Remove old subject boxes
     for widget in marks_frame.winfo_children():
         widget.destroy()
 
@@ -25,11 +44,11 @@ def create_subjects():
         if num_subjects <= 0:
             messagebox.showerror(
                 "Error",
-                "Please enter a valid number of subjects."
+                "Enter a valid number of subjects."
             )
             return
 
-        # Create Subject 1, Subject 2, Subject 3...
+        # Create Subject 1, Subject 2, ... Subject n
         for i in range(num_subjects):
             label = tk.Label(
                 marks_frame,
@@ -41,7 +60,7 @@ def create_subjects():
 
             entry = tk.Entry(
                 marks_frame,
-                width=20
+                width=25
             )
             entry.pack(pady=3)
 
@@ -56,10 +75,11 @@ def create_subjects():
 
 def calculate_result():
     try:
-        student_name = name_entry.get().strip()
-        roll_number = roll_entry.get().strip()
+        name = name_entry.get().strip()
+        roll_no = roll_entry.get().strip()
+        section = section_entry.get().strip()
 
-        if student_name == "" or roll_number == "":
+        if name == "" or roll_no == "":
             messagebox.showerror(
                 "Error",
                 "Please enter student name and roll number."
@@ -119,12 +139,16 @@ def calculate_result():
             remarks = "Fail"
 
         result_label.config(
-            text=f"Name: {student_name}\n"
-                 f"Roll No: {roll_number}\n"
-                 f"Total Marks: {total}/{maximum}\n"
-                 f"Percentage: {percentage:.2f}%\n"
-                 f"Grade: {grade}\n"
-                 f"Remarks: {remarks}"
+            text=(
+                f"Name: {name}\n"
+                f"Roll No: {roll_no}\n"
+                f"Class/Section: {section}\n"
+                f"Subjects: {len(marks)}\n"
+                f"Total Marks: {total}/{maximum}\n"
+                f"Percentage: {percentage:.2f}%\n"
+                f"Grade: {grade}\n"
+                f"Remarks: {remarks}"
+            )
         )
 
     except ValueError:
@@ -134,88 +158,74 @@ def calculate_result():
         )
 
 
-# Title
+# ---------------- GUI ----------------
 title = tk.Label(
-    root,
+    main_frame,
     text="Student Dashboard",
     font=("Arial", 20, "bold"),
     bg="#FFDDEE"
 )
 title.pack(pady=20)
 
-# Student Name
-name_label = tk.Label(
-    root,
+tk.Label(
+    main_frame,
     text="Student Name:",
     font=("Arial", 11),
     bg="#FFDDEE"
-)
-name_label.pack()
+).pack()
 
-name_entry = tk.Entry(
-    root,
-    width=30
-)
+name_entry = tk.Entry(main_frame, width=30)
 name_entry.pack(pady=5)
 
-# Roll Number
-roll_label = tk.Label(
-    root,
+tk.Label(
+    main_frame,
     text="Roll Number:",
     font=("Arial", 11),
     bg="#FFDDEE"
-)
-roll_label.pack()
+).pack()
 
-roll_entry = tk.Entry(
-    root,
-    width=30
-)
-roll_entry.pack(pady=10)
+roll_entry = tk.Entry(main_frame, width=30)
+roll_entry.pack(pady=5)
 
-# Number of Subjects
-subject_label = tk.Label(
-    root,
+tk.Label(
+    main_frame,
+    text="Class / Section:",
+    font=("Arial", 11),
+    bg="#FFDDEE"
+).pack()
+
+section_entry = tk.Entry(main_frame, width=30)
+section_entry.pack(pady=10)
+
+tk.Label(
+    main_frame,
     text="Enter Total Number of Subjects:",
     font=("Arial", 11),
     bg="#FFDDEE"
-)
-subject_label.pack()
+).pack()
 
-subject_number_entry = tk.Entry(
-    root,
-    width=20
-)
+subject_number_entry = tk.Entry(main_frame, width=20)
 subject_number_entry.pack(pady=10)
 
-# Create Subject Boxes
-create_button = tk.Button(
-    root,
+tk.Button(
+    main_frame,
     text="Create Subjects",
     command=create_subjects,
     width=20
-)
-create_button.pack(pady=10)
+).pack(pady=10)
 
-# Frame for Marks
-marks_frame = tk.Frame(
-    root,
-    bg="#FFDDEE"
-)
+marks_frame = tk.Frame(main_frame, bg="#FFDDEE")
 marks_frame.pack(pady=10)
 
-# Calculate Button
-calculate_button = tk.Button(
-    root,
+tk.Button(
+    main_frame,
     text="Calculate Result",
     command=calculate_result,
     width=20
-)
-calculate_button.pack(pady=20)
+).pack(pady=20)
 
-# Result Display
 result_label = tk.Label(
-    root,
+    main_frame,
     text="",
     font=("Arial", 12),
     bg="#FFDDEE",
